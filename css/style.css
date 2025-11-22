@@ -1,0 +1,49 @@
+.about-head{
+    background-image: url(4.jpg);
+    padding: 150px;
+    margin: center;
+}
+
+.about-head h2{
+    text-align: center;
+    font-size: 44px;
+    color: #ffffff;
+}
+
+.about-head h4{
+    text-align: center;
+    font-size: 22px;
+    color: #ffffff;
+}
+
+.main-section{
+    background-color: #ffffff;
+    padding: 80px;
+}
+
+.first{
+    width: 50%;
+    float: left;
+    padding-top: 40px;
+}
+
+.secound{
+    width: 50%;
+    overflow: hidden;
+}
+
+.first img{
+    width: 550px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-right: 30px;
+}
+
+.div{
+    width: 80px;
+    height: 2px;
+    background-color: #FF0000;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
