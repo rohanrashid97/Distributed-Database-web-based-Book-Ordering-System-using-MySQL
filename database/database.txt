@@ -1,0 +1,42 @@
+-- Recursive CTE to split total_books by book entries
+CREATE OR REPLACE VIEW book_stock_view AS
+WITH RECURSIVE split_books AS (
+    SELECT
+        co.order_id,
+        co.payment_status,
+        TRIM(SUBSTRING_INDEX(co.total_books, '  ', 1)) AS book_entry,
+        TRIM(SUBSTRING(co.total_books FROM LENGTH(SUBSTRING_INDEX(co.total_books, '  ', 1)) + 3)) AS rest,
+        co.total_books
+    FROM confirm_order co
+    WHERE co.payment_status = 'completed'
+
+    UNION ALL
+
+    SELECT
+        order_id,
+        payment_status,
+        TRIM(SUBSTRING_INDEX(rest, '  ', 1)) AS book_entry,
+        TRIM(SUBSTRING(rest FROM LENGTH(SUBSTRING_INDEX(rest, '  ', 1)) + 3)),
+        total_books
+    FROM split_books
+    WHERE rest != ''
+),
+
+-- Extract bid and qty from each book entry
+parsed_books AS (
+    SELECT
+        sb.order_id,
+        CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(sb.book_entry, ',(', 1), '#', -1) AS UNSIGNED) AS bid,
+        CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(sb.book_entry, '(', -1), ')', 1) AS UNSIGNED) AS qty
+    FROM split_books sb
+)
+
+SELECT
+    b.bid,
+    b.name AS book_name,
+    b.book_qty AS initial_qty,
+    COALESCE(SUM(pb.qty), 0) AS ordered_qty,
+    b.book_qty - COALESCE(SUM(pb.qty), 0) AS available_qty
+FROM book_info b
+LEFT JOIN parsed_books pb ON pb.bid = b.bid
+GROUP BY b.bid;
